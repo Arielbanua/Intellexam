@@ -1,9 +1,86 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, flash, request, redirect, url_for
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, TextAreaField
+from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms.widgets import TextArea
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+
 
 
 app = Flask(__name__)
+
+#add database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+#secret key
+app.config['SECRET_KEY'] = "secret"
+
+#initalize database
+db = SQLAlchemy(app)
+
+#create model
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique =True)
+    password = db.Column(db.String(128))
+
+
+    #create a string
+    def __repr__(self):
+        return '<Name %r>' % self.name
+    
+# Create database within app context
+with app.app_context():
+    db.create_all()
+
+
+# create registration form
+class RegisterForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(),])
+    submit = SubmitField("Submit")
+
+# create login form
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(),])
+    submit = SubmitField("Submit")
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Users(name=form.name.data, email=form.email.data, password=form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            form.name.data = ''
+            form.password.data = ''
+            form.email.data = ''
+            flash("User Added Successfully!")
+            return redirect(url_for('login'))
+
+        else:
+            form.name.data = ''
+            form.password.data = ''
+            form.email.data = ''
+            flash("Email taken!")
+    return render_template("register.html", form=form) 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if request.method == 'POST':
+        # Login logic here
+        #...
+        return redirect(url_for('index'))
+    return render_template('login.html', form=form)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -23,26 +100,6 @@ def index():
     if request.method == 'GET':
         return render_template("index.html")
 
-@app.route('/process_transcription', methods=['POST'])
-def process_transcription():
-    if request.method == 'POST':
-        audio_file = request.files['audio']
-        if audio_file:
-            try:
-                # Use SpeechRecognition to convert audio to text
-                recognizer = sr.Recognizer()
-                with sr.AudioFile(audio_file) as source:
-                    audio = recognizer.record(source)
-                text = recognizer.recognize_google(audio)
-                # Perform any necessary processing in Flask (e.g., database storage)
-                return text  # Return processed text
-            except sr.UnknownValueError:
-                return 'Speech could not be understood.'
-            except sr.RequestError as e:
-                return f"Could not request results from Google Speech Recognition service; {e}"
-        else:
-            return 'No audio file uploaded.'
-    return 'Invalid request method'
 
 if __name__ == '__main__':
     app.run(debug=True)
