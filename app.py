@@ -100,6 +100,13 @@ def login():
 
 	return render_template('login.html', form=form)
 
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    flash("You Have Been Logged Out!")
+    return redirect(url_for('login'))
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
