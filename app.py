@@ -21,8 +21,17 @@ app.config['SECRET_KEY'] = "secret"
 #initalize database
 db = SQLAlchemy(app)
 
+#flask login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
 #create model
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique =True)
@@ -75,12 +84,21 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    if request.method == 'POST':
-        # Login logic here
-        #...
-        return redirect(url_for('index'))
-    return render_template('login.html', form=form)
+	form = LoginForm()
+	if form.validate_on_submit():
+		user = Users.query.filter_by(email=form.email.data).first()
+		if user:
+			# Check the hash
+			if (user.password == form.password.data):
+				login_user(user)
+				flash("Login Succesfull!!")
+				return redirect(url_for('home'))
+			else:
+				flash("Wrong Password - Try Again!")
+		else:
+			flash("That User Doesn't Exist! Try Again...")
+
+	return render_template('login.html', form=form)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -100,6 +118,10 @@ def index():
     if request.method == 'GET':
         return render_template("index.html")
 
+@app.route('/home', methods=['GET', 'POST'])
+@login_required
+def home():
+    return render_template('home.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
