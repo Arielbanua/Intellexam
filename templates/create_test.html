@@ -1,0 +1,40 @@
+{% extends 'index.html' %}
+
+
+{% block content %}
+
+<h1>Create test</h1>
+<br>
+
+{% for message in get_flashed_messages() %}
+	
+	<div>
+	  {{ message }}
+	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+
+	
+{% endfor %}
+
+<form method="post">
+    {{ form.hidden_tag() }}
+
+		{{ form.title.label(class="form-label") }}
+
+		{{ form.title(class="form-control") }}
+		<br/>
+
+		{{ form.start_date.label(class="form-label") }}
+
+		{{ form.start_date(class="form-control") }}
+		<br/>
+
+		{{ form.end_date.label(class="form-label") }}
+
+		{{ form.end_date(class="form-control") }}
+		<br/>
+
+		{{ form.submit(class="btn btn-secondary") }}
+</form>
+
+{% endblock %}
