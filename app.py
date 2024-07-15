@@ -224,9 +224,39 @@ def add_question(id):
             db.session.commit()
             flash('Question created successfully!')
             return redirect(url_for('test', id=id))
-
-    
     return render_template('add_question.html', form=form, id = id)
+
+@app.route('/tests/<int:id>/delete-test', methods=['GET', 'POST'])
+def delete_test(id):
+    test_to_delete = Tests.query.get_or_404(id)
+    try:
+        db.session.delete(test_to_delete)
+        db.session.commit()
+
+	    # Return a message
+        flash("test Was Deleted!")
+        return redirect(url_for('tests'))
+    
+    except:
+        # Return an error message
+        flash("Delete failed")
+        return redirect(url_for('test', id=id))
+    
+@app.route('/tests/<int:id>/<int:question_id>/delete-question', methods=['GET', 'POST'])
+def delete_question(id, question_id):
+    question_to_delete = Questions.query.get_or_404(question_id)
+    try:
+        db.session.delete(question_to_delete)
+        db.session.commit()
+
+	    # Return a message
+        flash("question Was Deleted!")
+        return redirect(url_for('test', id=id))
+    
+    except:
+        # Return an error message
+        flash("Delete failed")
+        return redirect(url_for('test', id=id))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():

@@ -31,6 +31,7 @@
 
 	<br/><br/>
 	<a href="{{ url_for('test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">Manage test</a>
+	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">delete test</a>
 
 </div>
 {% endfor %}

@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<h1>tests</h1>
+<h1>manage test</h1>
 <br>
 
 {% for message in get_flashed_messages() %}
@@ -25,6 +25,7 @@
 
 	<br/><br/>
 	<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">add question</a>
+	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">delete test</a>
 
 	<br/>
 </div>
@@ -36,7 +37,9 @@
 	<ul class="list-group list-group-flush">
 		{% for question in questions %}
 
-		<li class="list-group-item">{{ question.question_text }}</li>
+		<li class="list-group-item">{{ question.question_text }} - 
+			<a href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete question</a> 
+		</li> 
 			
 		{% endfor %}
 	</ul>
