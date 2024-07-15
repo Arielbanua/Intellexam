@@ -4,8 +4,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, DateTimeLocalField, TextAreaField, DateTimeField
-from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, IntegerField, RadioField, DateTimeLocalField, TextAreaField, DateTimeField
+from wtforms.validators import DataRequired, EqualTo, Length, Optional
 from wtforms.widgets import TextArea
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
@@ -52,11 +52,12 @@ class Questions(db.Model):
     question_text = db.Column(db.String(255), nullable=False)
     question_type = db.Column(db.String(255), nullable=False)
     points = db.Column(db.Integer, nullable=False)
-    option1 = db.Column(db.String(255), nullable=False)
-    option2 = db.Column(db.String(255), nullable=False)
-    option3 = db.Column(db.String(255), nullable=False)
-    option4 = db.Column(db.String(255), nullable=False)
-    correct_opt = db.Column(db.Integer, nullable=False)
+    option1 = db.Column(db.String(255))
+    option2 = db.Column(db.String(255))
+    option3 = db.Column(db.String(255))
+    option4 = db.Column(db.String(255))
+    correct_opt = db.Column(db.Integer)
+    correct_ans = db.Column(db.String(255))
 	# Foreign Key To Link test (refer to primary key of the test)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
     #one-to-one relationship with the Answer model
@@ -96,9 +97,25 @@ class TestForm(FlaskForm):
     submit = SubmitField("Submit")
 
 class QuestionForm(FlaskForm):
-    title = StringField("Email", validators=[DataRequired()])
-    start_date = DateTimeField('Start_date', validators=[DataRequired()])
-    end_date = DateTimeField("End__date", validators=[DataRequired()])
+    question_text = StringField('Question Text', validators=[DataRequired()])
+    question_type = RadioField('Question Type', choices=[('multiple-choice', 'Multiple Choice'), ('essay', 'Essay')], validators=[DataRequired()])
+    points = IntegerField('Points', validators=[DataRequired()]) 
+   
+    # Multiple Choice fields
+    option1 = StringField('Option 1')
+    option2 = StringField('Option 2')
+    option3 = StringField('Option 3')
+    option4 = StringField('Option 4')
+    correct_opt = IntegerField('Correct Option', validators=[Optional()])
+   
+    # Essay field
+    correct_ans = TextAreaField('Correct Answer')
+
+    submit = SubmitField("Submit")
+
+    def validate_correct_ans(self, field):
+        if self.question_type.data == 'essay' and not field.data:
+            raise ValidationError('This field is required')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -120,6 +137,7 @@ def register():
             form.password.data = ''
             form.email.data = ''
             flash("Email taken!")
+    
     return render_template("register.html", form=form) 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -177,14 +195,38 @@ def tests():
 
 @app.route('/tests/<int:id>', methods=['GET', 'POST'])
 def test(id):
-	test = Tests.query.get_or_404(id)
-	return render_template('manage_test.html', test=test)
+    test = Tests.query.get_or_404(id)
+    questions = Questions.query.filter_by(test_id = id)
+    return render_template('manage_test.html', test=test, questions=questions)
 
-#lanjut kerja ini
 @app.route('/tests/<int:id>/add-question', methods=['GET', 'POST'])
 def add_question(id):
-	test = Tests.query.get_or_404(id)
-	return render_template('tests.html', test=test)
+    form = QuestionForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            # Create a new question object and save it to the database
+            question = Questions(question_text=form.question_text.data, 
+                                question_type=form.question_type.data, 
+                                points=form.points.data, 
+                                test_id = id)
+
+            if form.question_type.data == 'multiple-choice':
+                question.option1 = form.option1.data
+                question.option2 = form.option2.data
+                question.option3 = form.option3.data
+                question.option4 = form.option4.data
+                question.correct_opt = form.correct_opt.data
+
+            else:
+                question.correct_ans = form.correct_ans.data
+
+            db.session.add(question)
+            db.session.commit()
+            flash('Question created successfully!')
+            return redirect(url_for('test', id=id))
+
+    
+    return render_template('add_question.html', form=form, id = id)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():

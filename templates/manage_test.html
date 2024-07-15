@@ -30,4 +30,19 @@
 </div>
 <br/>
 
+
+	
+<div class="card" style="width: 18rem;">
+	<ul class="list-group list-group-flush">
+		{% for question in questions %}
+
+		<li class="list-group-item">{{ question.question_text }}</li>
+			
+		{% endfor %}
+	</ul>
+</div>
+
+	
+
+
 {% endblock %}
