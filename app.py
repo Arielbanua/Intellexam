@@ -204,7 +204,7 @@ def add_question(id):
     form = QuestionForm()
     if request.method == 'POST':
         if form.validate_on_submit():
-            # Create a new question object and save it to the database
+            ## Create a new question object and save it to the database
             question = Questions(question_text=form.question_text.data, 
                                 question_type=form.question_type.data, 
                                 points=form.points.data, 
@@ -242,6 +242,30 @@ def delete_test(id):
         flash("Delete failed")
         return redirect(url_for('test', id=id))
     
+@app.route('/tests/<int:id>/edit-test', methods=['GET', 'POST'])
+def edit_test(id):
+    test_to_edit = Tests.query.get_or_404(id)
+    form = TestForm()
+    if form.validate_on_submit():
+        test_to_edit.title = form.title.data
+        test_to_edit.start_date = form.start_date.data
+        test_to_edit.end_date = form.end_date.data
+		# Update Database
+        db.session.add(test_to_edit)
+        db.session.commit()
+        flash("test Has Been Updated!")
+        return redirect(url_for('test', id=id))
+
+    if current_user.id == test_to_edit.teacher_id:
+        form.title.data = test_to_edit.title
+        form.start_date.data = test_to_edit.start_date
+        form.end_date.data = test_to_edit.end_date
+        return render_template('edit_test.html', form=form)
+    
+    else:
+        flash("not authorized")
+        return redirect(url_for('tests'))
+    
 @app.route('/tests/<int:id>/<int:question_id>/delete-question', methods=['GET', 'POST'])
 def delete_question(id, question_id):
     question_to_delete = Questions.query.get_or_404(question_id)
@@ -257,6 +281,60 @@ def delete_question(id, question_id):
         # Return an error message
         flash("Delete failed")
         return redirect(url_for('test', id=id))
+
+#lanjut disini
+@app.route('/tests/<int:id>/<int:question_id>/edit-question', methods=['GET', 'POST'])
+def edit_question(id, question_id):
+    question_to_edit = Questions.query.get_or_404(question_id)
+    form = QuestionForm()
+    if form.validate_on_submit():
+        if form.question_type.data == 'multiple-choice':
+            question_to_edit.question_text = form.question_text.data
+            question_to_edit.question_type = form.question_type.data
+            question_to_edit.points = form.points.data
+            
+            question_to_edit.option1 = form.option1.data
+            question_to_edit.option2 = form.option2.data
+            question_to_edit.option3 = form.option3.data
+            question_to_edit.option4 = form.option4.data
+            question_to_edit.correct_opt = form.correct_opt.data
+            # Update Database
+            db.session.add(question_to_edit)
+            db.session.commit()
+            flash("question Has Been Updated!")
+            return redirect(url_for('test', id=id))
+        
+        elif form.question_type.data == 'essay':
+            question_to_edit.question_text = form.question_text.data
+            question_to_edit.question_type = form.question_type.data
+            question_to_edit.points = form.points.data
+
+            question_to_edit.correct_ans = form.correct_ans.data
+            # Update Database
+            db.session.add(question_to_edit)
+            db.session.commit()
+            flash("question Has Been Updated!")
+            return redirect(url_for('test', id=id))
+        
+        else:
+            flash("edit failed")
+            return redirect(url_for('edit_question', id=id, question_id = question_id))
+    else:
+        form.question_text.data = question_to_edit.question_text
+        form.question_type.data = question_to_edit.question_type
+        form.points.data = question_to_edit.points
+        if question_to_edit.question_type == 'multiple-choice':
+            form.option1.data = question_to_edit.option1
+            form.option2.data = question_to_edit.option2
+            form.option3.data = question_to_edit.option3
+            form.option4.data = question_to_edit.option4
+            form.correct_opt.data = question_to_edit.correct_opt
+            return render_template('edit_question.html', form=form, question = question_to_edit)
+        elif question_to_edit.question_type == 'essay':
+            form.correct_ans.data = question_to_edit.correct_ans
+            return render_template('edit_question.html', form=form, question = question_to_edit)
+        
+    
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
