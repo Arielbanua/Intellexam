@@ -8,10 +8,10 @@
 
 {% for message in get_flashed_messages() %}
 	
-	<div>
-	  {{ message }}
-	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	</div>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
 	
 {% endfor %}
@@ -90,7 +90,11 @@
             });
         </script>
 
-        {{ form.submit(class="btn btn-secondary") }}
+        <div class="d-grid">
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+
+        <!-- {{ form.submit(class=" d-grid gap-2 btn btn-primary btn-lg") }} -->
 </form>
 
 {% endblock %}

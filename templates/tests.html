@@ -3,37 +3,45 @@
 
 {% block content %}
 
-<h1>tests</h1>
+<h1>TESTS</h1>
 <br>
 
 {% for message in get_flashed_messages() %}
 	
-	<div>
-	  {{ message }}
-	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	</div>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
 	
 {% endfor %}
 
 <br/>
 
-<a href="{{ url_for('create_test')}}" class="btn btn-outline-secondary btn-sm">create test</a>
+<a href="{{ url_for('create_test')}}" class=" d-grid gap-2 btn btn-primary btn-lg">CREATE TEST</a>
 
 <br/>
 <br/>
 
-{% for test in tests %}
-<div class="shadow p-3 mb-5 bg-body rounded">
-	<h2><a href="{{ url_for('test', id=test.test_id)}}">{{ test.title }}</a></h2>
-    {{ test.teacher_id }}<br/>
-	<small>{{ test.start_date }}</small> <br/><br/>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+	
+	{% for test in tests %}
+	<div class="col">
 
-	<br/><br/>
-	<a href="{{ url_for('test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">Manage test</a>
-	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">delete test</a>
+		<div class="card ">
+		<div class="card-body">
+		<h5 class="card-title"><a href="{{ url_for('test', id=test.test_id)}}">{{ test.title }}</a></h5>
+		<p class="card-text">{{ test.teacher_id }}<br/>
+			<small>{{ test.start_date }}</small> <br/>
+		</p>
+		<a href="{{ url_for('test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">Manage test</a>
+		<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-danger btn-sm">delete test</a>
+		</div>
+		</div>	
 
+  
+	</div>
+	{% endfor %}
 </div>
-{% endfor %}
 
 {% endblock %}

@@ -3,15 +3,15 @@
 
 {% block content %}
 
-<h1>manage test</h1>
+<h1>MANAGE TEST</h1>
 <br>
 
 {% for message in get_flashed_messages() %}
 	
-	<div>
-	  {{ message }}
-	  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	</div>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
 	
 {% endfor %}
@@ -24,9 +24,9 @@
 	<small>{{ test.start_date }}</small> <br/><br/>
 
 	<br/><br/>
-	<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">add question</a>
-	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">delete test</a>
-	<a href="{{ url_for('edit_test', id=test.test_id)}}" class="btn btn-outline-secondary btn-sm">edit test</a>
+	<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-primary btn-sm">add question</a>
+	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-danger btn-sm">delete test</a>
+	<a href="{{ url_for('edit_test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">edit test</a>
 
 	<br/>
 </div>
@@ -34,13 +34,14 @@
 
 
 	
-<div class="card" style="width: 18rem;">
-	<ul class="list-group list-group-flush">
+<div class="card">
+	<ul class="list-group list-group-numbered list-group-flush">
 		{% for question in questions %}
 
-		<li class="list-group-item">{{ question.question_text }} - 
-			<a href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete question</a> 
-			<a href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit question</a> 
+		<li class="list-group-item  justify-content-between ">
+			{{ question.question_text }} 
+			<a class="btn btn-outline-danger btn-sm" href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete</a> 
+			<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
 		</li> 
 			
 		{% endfor %}

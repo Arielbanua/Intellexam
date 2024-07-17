@@ -7,7 +7,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, IntegerField, RadioField, DateTimeLocalField, TextAreaField, DateTimeField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional
 from wtforms.widgets import TextArea
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user
+from functools import wraps
+
+
 
 
 
@@ -30,12 +33,26 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
+def login_required(role="ANY"):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+
+            if not current_user.is_authenticated:
+               return login_manager.unauthorized()
+            if ( (current_user.role != role) and (role != "ANY")):
+                return login_manager.unauthorized()      
+            return fn(*args, **kwargs)
+        return decorated_view
+    return wrapper
+
 #create model
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(200), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique =True)
-    password = db.Column(db.String(128))
+    password = db.Column(db.String(128), nullable=False)
+    role = db.Column(db.String(80), nullable=False)
 
 class Tests(db.Model):
     test_id = db.Column(db.Integer, primary_key=True)
@@ -81,13 +98,15 @@ class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email", validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(),])
-    submit = SubmitField("Submit")
+    role = RadioField('Role', choices=[('student', 'student'), 
+                                                         ('teacher', 'teacher')], validators=[DataRequired()])
+    submit = SubmitField("Register")
 
 # create login form
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(),])
-    submit = SubmitField("Submit")
+    submit = SubmitField("Login")
 
 # create create-test form
 class TestForm(FlaskForm):
@@ -123,12 +142,13 @@ def register():
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            user = Users(name=form.name.data, email=form.email.data, password=form.password.data)
+            user = Users(name=form.name.data, email=form.email.data, password=form.password.data, role = form.role.data)
             db.session.add(user)
             db.session.commit()
             form.name.data = ''
             form.password.data = ''
             form.email.data = ''
+            form.role.data = ''
             flash("User Added Successfully!")
             return redirect(url_for('login'))
 
@@ -142,30 +162,35 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-	form = LoginForm()
-	if form.validate_on_submit():
-		user = Users.query.filter_by(email=form.email.data).first()
-		if user:
-			# Check the hash
-			if (user.password == form.password.data):
-				login_user(user)
-				flash("Login Succesfull!!")
-				return redirect(url_for('home'))
-			else:
-				flash("Wrong Password - Try Again!")
-		else:
-			flash("That User Doesn't Exist! Try Again...")
-
-	return render_template('login.html', form=form)
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(email=form.email.data).first()
+        if user:
+            if (user.password == form.password.data):
+                if (user.role == "teacher"):
+                    login_user(user)
+                    flash("Login Succesfull!!")
+                    return redirect(url_for('teacher_dashboard'))
+                else:
+                    login_user(user)
+                    flash("Login Succesfull!!")
+                    return redirect(url_for('student_dashboard'))
+            else:
+                flash("Wrong Password - Try Again!")
+        else:
+            flash("That User Doesn't Exist! Try Again...")
+        
+    return render_template('login.html', form=form)
 
 @app.route('/logout', methods=['GET', 'POST'])
-@login_required
+@login_required(role="ANY")
 def logout():
     logout_user()
     flash("You Have Been Logged Out!")
     return redirect(url_for('login'))
 
 @app.route('/create-test', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def create_test():
     form = TestForm()
     if form.validate_on_submit():
@@ -188,18 +213,21 @@ def create_test():
     return render_template("create_test.html", form=form)
 
 @app.route('/tests', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def tests():
      # Grab all the tests by the teacher from the database
 	tests = Tests.query.filter_by(teacher_id = current_user.id)
 	return render_template("tests.html", tests=tests)
 
 @app.route('/tests/<int:id>', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def test(id):
     test = Tests.query.get_or_404(id)
     questions = Questions.query.filter_by(test_id = id)
     return render_template('manage_test.html', test=test, questions=questions)
 
 @app.route('/tests/<int:id>/add-question', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def add_question(id):
     form = QuestionForm()
     if request.method == 'POST':
@@ -227,6 +255,7 @@ def add_question(id):
     return render_template('add_question.html', form=form, id = id)
 
 @app.route('/tests/<int:id>/delete-test', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def delete_test(id):
     test_to_delete = Tests.query.get_or_404(id)
     try:
@@ -243,6 +272,7 @@ def delete_test(id):
         return redirect(url_for('test', id=id))
     
 @app.route('/tests/<int:id>/edit-test', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def edit_test(id):
     test_to_edit = Tests.query.get_or_404(id)
     form = TestForm()
@@ -267,6 +297,7 @@ def edit_test(id):
         return redirect(url_for('tests'))
     
 @app.route('/tests/<int:id>/<int:question_id>/delete-question', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def delete_question(id, question_id):
     question_to_delete = Questions.query.get_or_404(question_id)
     try:
@@ -282,8 +313,8 @@ def delete_question(id, question_id):
         flash("Delete failed")
         return redirect(url_for('test', id=id))
 
-#lanjut disini
 @app.route('/tests/<int:id>/<int:question_id>/edit-question', methods=['GET', 'POST'])
+@login_required(role="teacher")
 def edit_question(id, question_id):
     question_to_edit = Questions.query.get_or_404(question_id)
     form = QuestionForm()
@@ -352,12 +383,18 @@ def index():
 
             return render_template('answer.html', answer=answer, result=result)
     if request.method == 'GET':
-        return render_template("index.html")
+        form = RegisterForm()
+        return redirect(url_for('login'))
 
-@app.route('/home', methods=['GET', 'POST'])
-@login_required
-def home():
-    return render_template('home.html')
+@app.route('/teacher', methods=['GET', 'POST'])
+@login_required(role="teacher")
+def teacher_dashboard():
+    return render_template('teacher_dashboard.html')
+
+@app.route('/student', methods=['GET', 'POST'])
+@login_required(role="student")
+def student_dashboard():
+    return render_template('student_dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
