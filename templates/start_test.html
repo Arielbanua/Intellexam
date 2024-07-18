@@ -1,0 +1,36 @@
+{% extends 'index.html' %}
+
+
+{% block content %}
+
+
+{% for message in get_flashed_messages() %}
+	
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+	
+{% endfor %}
+
+<h1>Start Test: {{ test.title }}</h1>
+
+<form action="" method="post">
+    {% for question in questions %}
+        <h2>Question {{ loop.index }}: {{ question.question_text }}</h2>
+        {% if question.question_type == 'multiple-choice' %}
+            <ul>
+                <li><input type="radio" name="answer_{{ question.id }}" value="1"> {{ question.option1 }}</li>
+                <li><input type="radio" name="answer_{{ question.id }}" value="2"> {{ question.option2 }}</li>
+                <li><input type="radio" name="answer_{{ question.id }}" value="3"> {{ question.option3 }}</li>
+                <li><input type="radio" name="answer_{{ question.id }}" value="4"> {{ question.option4 }}</li>
+            </ul>
+        {% elif question.question_type == 'essay' %}
+            <textarea name="answer_{{ question.id }}"></textarea>
+        {% endif %}
+    {% endfor %}
+    <input type="submit" value="Submit Test">
+</form>
+
+{% endblock %}

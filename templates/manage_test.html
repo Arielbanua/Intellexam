@@ -22,6 +22,9 @@
 	<h2>{{ test.title }}</h2>
     {{ test.teacher_id }}<br/>
 	<small>{{ test.start_date }}</small> <br/><br/>
+	<p>
+		Test code : {{ test.code }}
+	</p>
 
 	<br/><br/>
 	<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-primary btn-sm">add question</a>

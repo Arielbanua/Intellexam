@@ -9,6 +9,7 @@ from wtforms.validators import DataRequired, EqualTo, Length, Optional
 from wtforms.widgets import TextArea
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user
 from functools import wraps
+import secrets
 
 
 
@@ -61,8 +62,14 @@ class Tests(db.Model):
     end_date = db.Column(db.DateTime, default=datetime.utcnow)
     # Foreign Key To Link User (refer to primary key of the user)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # teacher object associated to the test
+    teacher = db.relationship('Users', backref=db.backref('tests', lazy=True))
     # list of questions from the questions table
-    questions = db.relationship("Questions", backref="test")
+    questions = db.relationship("Questions", backref="question_list")
+    code = db.Column(db.String(6), unique=True)  # column to store the unique code
+    # students object in the test
+    students = db.relationship('Users', secondary='test_students', backref=db.backref('tests_registered', lazy=True))
+
      
 class Questions(db.Model):
     question_id = db.Column(db.Integer, primary_key=True)
@@ -77,6 +84,8 @@ class Questions(db.Model):
     correct_ans = db.Column(db.String(255))
 	# Foreign Key To Link test (refer to primary key of the test)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
+    # test object related to the question
+    test = db.relationship('Tests', backref=db.backref('question_test', lazy=True))
     #one-to-one relationship with the Answer model
     answer = db.relationship("Answers", uselist=False)
 
@@ -87,6 +96,14 @@ class Answers(db.Model):
     chosen_opt = db.Column(db.Integer, nullable=False)
 	# Foreign Key To Link to answer (refer to primary key of the question)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
+    # Foreign Key To Link to users(student) (refer to primary key of the user)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # student object associated with the answer
+    student = db.relationship('Users', backref=db.backref('answers', lazy=True))
+
+test_students = db.Table('test_students',
+                         db.Column('test_id', db.Integer, db.ForeignKey('tests.test_id'), primary_key=True),
+                         db.Column('student_id', db.Integer, db.ForeignKey('users.id'), primary_key=True))
     
 # Create database within app context
 with app.app_context():
@@ -107,6 +124,11 @@ class LoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(),])
     submit = SubmitField("Login")
+
+# create enter-code form
+class CodeForm(FlaskForm):
+    code = StringField("Code", validators=[DataRequired()])
+    submit = SubmitField("Submit")
 
 # create create-test form
 class TestForm(FlaskForm):
@@ -195,7 +217,8 @@ def create_test():
     form = TestForm()
     if form.validate_on_submit():
         creator = current_user.id
-        test = Tests(title=form.title.data, start_date=form.start_date.data, end_date=form.end_date.data, teacher_id=creator)
+        code = secrets.token_hex(3)  # generate a random 6-digit code
+        test = Tests(title=form.title.data, start_date=form.start_date.data, end_date=form.end_date.data, teacher_id=creator, code=code, teacher = current_user)
 		# Clear The Form
         form.title.data = ''
         form.start_date.data = ''
@@ -215,7 +238,7 @@ def create_test():
 @app.route('/tests', methods=['GET', 'POST'])
 @login_required(role="teacher")
 def tests():
-     # Grab all the tests by the teacher from the database
+    # Grab all the tests by the teacher from the database
 	tests = Tests.query.filter_by(teacher_id = current_user.id)
 	return render_template("tests.html", tests=tests)
 
@@ -232,11 +255,12 @@ def add_question(id):
     form = QuestionForm()
     if request.method == 'POST':
         if form.validate_on_submit():
+            test = Tests.query.get_or_404(id)
             ## Create a new question object and save it to the database
             question = Questions(question_text=form.question_text.data, 
                                 question_type=form.question_type.data, 
                                 points=form.points.data, 
-                                test_id = id)
+                                test_id = id, test = test)
 
             if form.question_type.data == 'multiple-choice':
                 question.option1 = form.option1.data
@@ -247,6 +271,8 @@ def add_question(id):
 
             else:
                 question.correct_ans = form.correct_ans.data
+
+            test.questions.append(question)
 
             db.session.add(question)
             db.session.commit()
@@ -281,7 +307,6 @@ def edit_test(id):
         test_to_edit.start_date = form.start_date.data
         test_to_edit.end_date = form.end_date.data
 		# Update Database
-        db.session.add(test_to_edit)
         db.session.commit()
         flash("test Has Been Updated!")
         return redirect(url_for('test', id=id))
@@ -300,7 +325,11 @@ def edit_test(id):
 @login_required(role="teacher")
 def delete_question(id, question_id):
     question_to_delete = Questions.query.get_or_404(question_id)
+    test = Tests.query.get_or_404(id)
     try:
+        # Remove the question from the test's questions field
+        test.questions.remove(question_to_delete)
+
         db.session.delete(question_to_delete)
         db.session.commit()
 
@@ -365,7 +394,29 @@ def edit_question(id, question_id):
             form.correct_ans.data = question_to_edit.correct_ans
             return render_template('edit_question.html', form=form, question = question_to_edit)
         
-    
+@app.route('/student/enter-code', methods=['GET', 'POST'])
+@login_required(role="student")
+def enter_code():
+    form = CodeForm()
+    if form.validate_on_submit():
+        code = form.code.data
+        test = Tests.query.filter_by(code=code).first()
+        if test:
+            test.students.append(current_user)
+            db.session.commit()
+            flash("succesfully joined a test")
+            return redirect(url_for('student_dashboard'))
+        else:
+            flash("Invalid code")
+            return redirect(url_for('enter_code'))
+    return render_template('enter_code.html', form=form)
+
+@app.route('/start-test/<int:test_id>', methods=['GET', 'POST'])
+@login_required(role="student")
+def start_test(test_id):
+    test = Tests.query.get_or_404(test_id)
+    questions = test.questions
+    return render_template('start_test.html', test=test, questions=questions)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -394,7 +445,9 @@ def teacher_dashboard():
 @app.route('/student', methods=['GET', 'POST'])
 @login_required(role="student")
 def student_dashboard():
-    return render_template('student_dashboard.html')
+    # Grab all the tests registered by the student from the database
+    tests = current_user.tests_registered
+    return render_template('student_dashboard.html', tests=tests)
 
 if __name__ == '__main__':
     app.run(debug=True)
