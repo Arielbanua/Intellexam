@@ -91,9 +91,10 @@ class Questions(db.Model):
 
 class Answers(db.Model):
     answer_id = db.Column(db.Integer, primary_key=True)
-    answer_text = db.Column(db.String(255), nullable=False)
+    answer_text = db.Column(db.String(255))
     result = db.Column(db.Boolean, nullable=False) 
-    chosen_opt = db.Column(db.Integer, nullable=False)
+    chosen_opt = db.Column(db.Integer)
+    points_gained = db.Column(db.Integer)
 	# Foreign Key To Link to answer (refer to primary key of the question)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
     # Foreign Key To Link to users(student) (refer to primary key of the user)
@@ -426,9 +427,63 @@ def start_test(test_id):
     if request.method == 'POST':
         # Redirect to submit-test route to handle form submission
         flash("Test submitted testing")
-        return redirect(url_for('student_dashboard'))
+        return redirect(url_for('submit_test', test_id = test_id))
     
     return render_template('start_test.html', test=test, questions=questions)
+
+@app.route('/submit-test/<int:test_id>', methods=['POST'])
+@login_required(role="student")
+def submit_test(test_id):
+    test = Tests.query.get_or_404(test_id)
+    questions = test.questions
+
+    # Create a list to store the answers
+    answers = []
+
+    # Iterate over the questions and get the user's answers
+    for question in questions:
+
+        # Check if the question is multiple-choice or essay
+        if question.question_type == 'multiple-choice':
+            correct_option = question.correct_opt
+            chosen_opt = int(request.form.get(f"chosen_opt_{question.question_id}"))
+            if chosen_opt == correct_option:
+                result = True
+                points_gained = question.points
+            else:
+                result = False
+                points_gained = None
+            
+            # Create an Answer object and add it to the list
+            answer_obj = Answers(chosen_opt = chosen_opt, result=result, question_id=question.question_id, 
+                                 student_id=current_user.id, student = current_user, points_gained = points_gained)
+            answers.append(answer_obj)
+
+        elif question.question_type == 'essay':
+            answer = request.form.get(f"answer_{question.question_id}")
+            correct_answer = question.correct_ans
+            if answer == correct_answer:
+                result = True
+                points_gained = question.points
+            else:
+                result = False
+                points_gained = None
+
+            # Create an Answer object and add it to the list
+            answer_obj = Answers(answer_text = answer, result=result, question_id=question.question_id, 
+                                 student_id=current_user.id, student = current_user, points_gained = points_gained)
+            answers.append(answer_obj)
+        
+    # Add the answers to the database
+    db.session.add_all(answers)
+    db.session.commit()
+
+    # Update the test status
+
+
+    flash("Test submitted successfully!")
+    #return render_template('debug_answers.html', answers=answers)
+    return redirect(url_for('student_dashboard'))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():

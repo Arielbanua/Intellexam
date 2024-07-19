@@ -19,18 +19,18 @@
 
 
 
-<form id="test-form" action="{{ url_for('student_dashboard') }}" method="post">
+<form id="test-form" action="{{ url_for('submit_test', test_id = test.test_id) }}" method="post">
     {% for question in questions %}
         <h2>Question {{ loop.index }}: {{ question.question_text }}</h2>
         {% if question.question_type == 'multiple-choice' %}
             <ul>
-                <li><input type="radio" name="answer_{{ question.id }}" value="1"> {{ question.option1 }}</li>
-                <li><input type="radio" name="answer_{{ question.id }}" value="2"> {{ question.option2 }}</li>
-                <li><input type="radio" name="answer_{{ question.id }}" value="3"> {{ question.option3 }}</li>
-                <li><input type="radio" name="answer_{{ question.id }}" value="4"> {{ question.option4 }}</li>
+                <li><input type="radio" name="chosen_opt_{{ question.question_id }}" value="1"> {{ question.option1 }}</li>
+                <li><input type="radio" name="chosen_opt_{{ question.question_id }}" value="2"> {{ question.option2 }}</li>
+                <li><input type="radio" name="chosen_opt_{{ question.question_id }}" value="3"> {{ question.option3 }}</li>
+                <li><input type="radio" name="chosen_opt_{{ question.question_id }}" value="4"> {{ question.option4 }}</li>
             </ul>
         {% elif question.question_type == 'essay' %}
-            <textarea name="answer_{{ question.id }}"></textarea>
+            <textarea name="answer_{{ question.question_id }}"></textarea>
         {% endif %}
     {% endfor %}
     <input type="submit" value="Submit Test">
