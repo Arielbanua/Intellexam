@@ -15,8 +15,11 @@
 {% endfor %}
 
 <h1>Start Test: {{ test.title }}</h1>
+<p>Remaining time: <span id="timer"></span></p>
 
-<form action="" method="post">
+
+
+<form id="test-form" action="{{ url_for('student_dashboard') }}" method="post">
     {% for question in questions %}
         <h2>Question {{ loop.index }}: {{ question.question_text }}</h2>
         {% if question.question_type == 'multiple-choice' %}
@@ -32,5 +35,32 @@
     {% endfor %}
     <input type="submit" value="Submit Test">
 </form>
+
+<script>
+    const startTime = new Date("{{ test.start_date }}");
+    const endTime = new Date("{{ test.end_date }}");
+    const currentTime = new Date();
+    const remainingTime = endTime - currentTime;
+  
+    const timerElement = document.getElementById("timer");
+    const form = document.getElementById("test-form");
+
+    let timeoutId = setTimeout(() => {
+        form.submit(); // Submit the form when time runs out
+    }, remainingTime);
+
+    let intervalId = setInterval(() => {
+        const timeLeft = Math.max(0, remainingTime - (new Date() - startTime));
+        const minutes = Math.floor(timeLeft / 60000);
+        const seconds = Math.floor((timeLeft % 60000) / 1000);
+        timerElement.textContent = `${minutes} minutes ${seconds} seconds`;
+
+        if (timeLeft <= 0) {
+            clearTimeout(timeoutId);
+            clearInterval(intervalId);
+            form.submit(); // Submit the form when time runs out
+        }
+    }, 1000);
+</script>
 
 {% endblock %}

@@ -416,6 +416,18 @@ def enter_code():
 def start_test(test_id):
     test = Tests.query.get_or_404(test_id)
     questions = test.questions
+
+     # Check if the test is within the allowed duration
+    current_time = datetime.now()
+    if current_time < test.start_date or current_time > test.end_date:
+        flash("Test is not available at this time. Please try again later.")
+        return redirect(url_for('student_dashboard'))
+    
+    if request.method == 'POST':
+        # Redirect to submit-test route to handle form submission
+        flash("Test submitted testing")
+        return redirect(url_for('student_dashboard'))
+    
     return render_template('start_test.html', test=test, questions=questions)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -448,6 +460,9 @@ def student_dashboard():
     # Grab all the tests registered by the student from the database
     tests = current_user.tests_registered
     return render_template('student_dashboard.html', tests=tests)
+
+#add timer function for tests
+
 
 if __name__ == '__main__':
     app.run(debug=True)
