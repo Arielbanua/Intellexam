@@ -25,37 +25,41 @@
 
 <div class="list-group">
     {% for question in test.questions %}
-    {% if question.answer.result == True %}
-        <a  class="list-group-item list-group-item-action active" >
-        <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{ question.question_text }}</h5>
-            <h3>{{question.points}}</h3>
-        </div>
-            {% if question.question_type == 'multiple-choice' %}
-                <p class="mb-1"><b>Chosen Option: </b>{{question.answer.chosen_opt}}</p>
-                <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
-            {% elif question.question_type == 'essay' %}
-                <p class="mb-1"><b>Student Answer: </b>{{question.answer.answer_text}}</p>
-                <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
+        {% for answer in submission.answers %}
+            {% if answer.question_id == question.question_id %}
+                {% if answer.result == True %}
+                    <a  class="list-group-item list-group-item-action active" >
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ question.question_text }}</h5>
+                        <h3>{{question.points}}</h3>
+                    </div>
+                        {% if question.question_type == 'multiple-choice' %}
+                            <p class="mb-1"><b>Chosen Option: </b>{{answer.chosen_opt}}</p>
+                            <p class="mb-1"><b>Correct Option: </b>{{answer.correct_opt}}</p>
+                        {% elif question.question_type == 'essay' %}
+                            <p class="mb-1"><b>Student Answer: </b>{{answer.answer_text}}</p>
+                            <p class="mb-1"><b>Correct Answer: </b>{{answer.correct_ans}}</p>
+                        {% endif %}
+                    <small><b>Result: </b>{{answer.result}}</small>
+                    </a>
+                {% else %}
+                    <a  class="list-group-item list-group-item-action" >
+                        <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ question.question_text }}</h5>
+                        <h3>{{question.points}}</h3>
+                        </div>
+                        {% if question.question_type == 'multiple-choice' %}
+                            <p class="mb-1"><b>Chosen Option: </b>{{answer.chosen_opt}}</p>
+                            <p class="mb-1"><b>Correct Option: </b>{{answer.correct_opt}}</p>
+                        {% elif question.question_type == 'essay' %}
+                            <p class="mb-1"><b>Student Answer: </b>{{answer.answer_text}}</p>
+                            <p class="mb-1"><b>Correct Answer: </b>{{answer.correct_ans}}</p>
+                        {% endif %}
+                        <small><b>Result: </b>{{answer.result}}</small>
+                    </a>
+                {% endif %}
             {% endif %}
-        <small><b>Result: </b>{{question.answer.result}}</small>
-        </a>
-    {% else %}
-        <a  class="list-group-item list-group-item-action" >
-            <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{ question.question_text }}</h5>
-            <h3>{{question.points}}</h3>
-            </div>
-            {% if question.question_type == 'multiple-choice' %}
-                <p class="mb-1"><b>Chosen Option: </b>{{question.answer.chosen_opt}}</p>
-                <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
-            {% elif question.question_type == 'essay' %}
-                <p class="mb-1"><b>Student Answer: </b>{{question.answer.answer_text}}</p>
-                <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
-            {% endif %}
-            <small><b>Result: </b>{{question.answer.result}}</small>
-        </a>
-    {% endif %}
+        {% endfor %}    
     {% endfor %}
 
 {% endblock %}

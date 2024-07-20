@@ -463,6 +463,11 @@ def start_test(test_id):
     test = Tests.query.get_or_404(test_id)
     questions = test.questions
 
+    for submission in test.submissions:
+        if submission.student_id == current_user.id:
+            flash("You have already submitted this test")
+            return redirect(url_for('student_dashboard'))
+
      # Check if the test is within the allowed duration
     current_time = datetime.now()
     if current_time < test.start_date or current_time > test.end_date:

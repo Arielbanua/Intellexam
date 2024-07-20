@@ -36,8 +36,9 @@
 	{% endif %}
 	{% if test.status == 'scheduled' or test.status == "finished" %}
 		<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-danger btn-sm">delete test</a>
+		<br/>
 	{% endif %}
-	<br/>
+	
 </div>
 
 
