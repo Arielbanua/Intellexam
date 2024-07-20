@@ -464,6 +464,9 @@ def submit_test(test_id):
     # Create a list to store the answers
     answers = []
 
+    #initiate model
+    model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
+
     # Iterate over the questions and get the user's answers
     for question in questions:
 
@@ -490,9 +493,22 @@ def submit_test(test_id):
             if answer == correct_answer:
                 result = True
                 points_gained = question.points
+            # else:
+            #     result = False
+            #     points_gained = None
             else:
-                result = False
-                points_gained = None
+                sentences = [correct_answer, answer]
+
+                embeddings = model.encode(sentences)
+                similarity_result = cosine_similarity([embeddings[0]], embeddings[1:])
+                similarity_result = similarity_result.item()
+
+                if similarity_result > 0.5:
+                    result = True
+                    points_gained = question.points
+                else:
+                    result = False
+                    points_gained = None
 
             # Create an Answer object and add it to the list
             answer_obj = Answers(answer_text = answer, result=result, question_id=question.question_id, 
@@ -545,10 +561,6 @@ def student_dashboard():
     # Grab all the tests registered by the student from the database
     tests = current_user.tests_registered
     return render_template('student_dashboard.html', tests=tests)
-
-######## add Submission model and update the other models
-######## update the method when a student submitted a test
-######## show the submissions in manage_test.html or in the test/test_id route
 
 
 if __name__ == '__main__':
