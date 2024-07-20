@@ -54,6 +54,9 @@ class Users(db.Model, UserMixin):
     email = db.Column(db.String(120), nullable=False, unique =True)
     password = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(80), nullable=False)
+    # submissions object in the users
+    submissions = db.relationship('Submission', backref='submitted_tests', lazy=True)
+
 
 class Tests(db.Model):
     test_id = db.Column(db.Integer, primary_key=True)
@@ -69,6 +72,9 @@ class Tests(db.Model):
     code = db.Column(db.String(6), unique=True)  # column to store the unique code
     # students object in the test
     students = db.relationship('Users', secondary='test_students', backref=db.backref('tests_registered', lazy=True))
+    # submissions object in the test
+    submissions = db.relationship('Submission', backref='test_submissions', lazy=True)
+
 
      
 class Questions(db.Model):
@@ -95,12 +101,24 @@ class Answers(db.Model):
     result = db.Column(db.Boolean, nullable=False) 
     chosen_opt = db.Column(db.Integer)
     points_gained = db.Column(db.Integer)
-	# Foreign Key To Link to answer (refer to primary key of the question)
+	# Foreign Key To Link to question (refer to primary key of the question)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
     # Foreign Key To Link to users(student) (refer to primary key of the user)
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # student object associated with the answer
     student = db.relationship('Users', backref=db.backref('answers', lazy=True))
+    # Foreign Key To Link to submissions (refer to primary key of the submission)
+    submission_id = db.Column(db.Integer, db.ForeignKey('submission.submission_id'))
+    submission = db.relationship('Submission', backref=db.backref('answer', lazy=True))
+
+class Submission(db.Model):
+    submission_id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
+    submitted_at = db.Column(db.DateTime, default=datetime.now)
+    student = db.relationship('Users', backref=db.backref('submitter', lazy=True))
+    test = db.relationship('Tests', backref=db.backref('submission_test', lazy=True))
+    answers = db.relationship('Answers', backref=db.backref('answered_questions', lazy=True), lazy=True)
 
 test_students = db.Table('test_students',
                          db.Column('test_id', db.Integer, db.ForeignKey('tests.test_id'), primary_key=True),
@@ -437,6 +455,12 @@ def submit_test(test_id):
     test = Tests.query.get_or_404(test_id)
     questions = test.questions
 
+    # Create a new Submission object
+    submission = Submission(student_id=current_user.id, test_id=test_id, 
+                            student = current_user, test = test)
+    db.session.add(submission)
+    db.session.commit()
+
     # Create a list to store the answers
     answers = []
 
@@ -456,7 +480,8 @@ def submit_test(test_id):
             
             # Create an Answer object and add it to the list
             answer_obj = Answers(chosen_opt = chosen_opt, result=result, question_id=question.question_id, 
-                                 student_id=current_user.id, student = current_user, points_gained = points_gained)
+                                 student_id=current_user.id, student = current_user, points_gained = points_gained,
+                                 submission_id=submission.submission_id, submission = submission)
             answers.append(answer_obj)
 
         elif question.question_type == 'essay':
@@ -471,18 +496,23 @@ def submit_test(test_id):
 
             # Create an Answer object and add it to the list
             answer_obj = Answers(answer_text = answer, result=result, question_id=question.question_id, 
-                                 student_id=current_user.id, student = current_user, points_gained = points_gained)
+                                 student_id=current_user.id, student = current_user, points_gained = points_gained,
+                                 submission_id=submission.submission_id, submission = submission)
             answers.append(answer_obj)
         
     # Add the answers to the database
+    submission.answers = answers # Add the answers to submission's answers field
     db.session.add_all(answers)
     db.session.commit()
 
     # Update the test status
 
+    #debug purpose
+    #submission_to_test1 = submission
 
     flash("Test submitted successfully!")
-    #return render_template('debug_answers.html', answers=answers)
+    #debug purpose
+    #return render_template('debug_answers.html', answers=answers, submission = submission_to_test1)
     return redirect(url_for('student_dashboard'))
 
 @app.route('/', methods=['GET', 'POST'])
@@ -516,7 +546,9 @@ def student_dashboard():
     tests = current_user.tests_registered
     return render_template('student_dashboard.html', tests=tests)
 
-#add timer function for tests
+######## add Submission model and update the other models
+######## update the method when a student submitted a test
+######## show the submissions in manage_test.html or in the test/test_id route
 
 
 if __name__ == '__main__':

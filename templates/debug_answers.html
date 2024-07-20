@@ -1,0 +1,30 @@
+<h1>Debug Answers</h1>
+
+<ul>
+    {% for answer in answers %}
+        <li>
+            Question {{ answer.question_id }}: 
+            Chosen Option {{ answer.chosen_opt }} -
+            answer {{ answer.answer_text }} -
+            Result {{ answer.result }} -
+            
+            Submission id {{ answer.submission.submission_id }}-
+            Submission time {{ answer.submission.submitted_at }} -
+            student {{ answer.submission.student_id }} -
+            test {{ answer.submission.test_id }} -
+            name {{ answer.submission.student.name }}
+
+        </li>
+    {% endfor %}
+</ul>
+
+<ul>
+    <li>
+        Submission id {{ submission.submission_id }}-
+        Submission time {{ submission.submitted_at }} -
+        student {{ submission.student_id }} -
+        test {{ submission.test_id }} -
+        name {{ submission.student.name }}
+
+    </li>
+</ul>
