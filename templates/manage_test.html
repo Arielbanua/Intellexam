@@ -25,12 +25,18 @@
 	<p>
 		Test code : {{ test.code }}
 	</p>
+	<p>
+		Status : {{ test.status }}
+	</p>
 
 	<br/><br/>
-	<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-primary btn-sm">add question</a>
-	<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-danger btn-sm">delete test</a>
-	<a href="{{ url_for('edit_test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">edit test</a>
-
+	{% if test.status == 'scheduled' %}
+		<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-primary btn-sm">add question</a>
+		<a href="{{ url_for('edit_test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">edit test</a>
+	{% endif %}
+	{% if test.status == 'scheduled' or test.status == "finished" %}
+		<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-outline-danger btn-sm">delete test</a>
+	{% endif %}
 	<br/>
 </div>
 
@@ -52,8 +58,10 @@
 		
 				<li style="text-align: left;" class="list-group-item justify-content-between ">
 					{{ question.question_text }} 
-					<a class="btn btn-outline-danger btn-sm" href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete</a> 
-					<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
+					{% if test.status == 'scheduled' %}
+						<a class="btn btn-outline-danger btn-sm" href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete</a> 
+						<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
+					{% endif %}
 				</li> 
 					
 				{% endfor %}

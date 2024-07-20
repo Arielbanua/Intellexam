@@ -10,6 +10,7 @@ from wtforms.widgets import TextArea
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user
 from functools import wraps
 import secrets
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 
@@ -46,6 +47,8 @@ def login_required(role="ANY"):
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
+
+
 
 #create model
 class Users(db.Model, UserMixin):
@@ -130,6 +133,26 @@ test_students = db.Table('test_students',
 with app.app_context():
     db.create_all()
 
+# Create a scheduler
+scheduler = BackgroundScheduler()
+
+# Define a function to update test status
+def update_test_status():
+    with app.app_context():
+        tests = Tests.query.all()
+        current_time = datetime.now()
+        for test in tests:
+            if test.start_date <= current_time < test.end_date:
+                test.status = 'ongoing'
+            elif current_time >= test.end_date:
+                test.status = 'finished'
+        db.session.commit()
+
+# Add the job to the scheduler
+scheduler.add_job(func=update_test_status, trigger="interval", seconds=60)  # Run every 60 seconds
+
+# Start the scheduler
+scheduler.start()
 
 # create registration form
 class RegisterForm(FlaskForm):
@@ -244,6 +267,8 @@ def create_test():
         form.title.data = ''
         form.start_date.data = ''
         form.end_date.data = ''
+
+        test.status = 'scheduled'
 
 		# Add test data to database
         db.session.add(test)
@@ -441,12 +466,12 @@ def start_test(test_id):
      # Check if the test is within the allowed duration
     current_time = datetime.now()
     if current_time < test.start_date or current_time > test.end_date:
-        flash("Test is not available at this time. Please try again later.")
+        flash("Test is not available at this time.")
         return redirect(url_for('student_dashboard'))
     
     if request.method == 'POST':
         # Redirect to submit-test route to handle form submission
-        flash("Test submitted testing")
+        flash("Test submitted")
         return redirect(url_for('submit_test', test_id = test_id))
     
     return render_template('start_test.html', test=test, questions=questions)
@@ -567,4 +592,4 @@ def student_dashboard():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
