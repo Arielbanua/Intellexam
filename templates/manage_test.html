@@ -66,11 +66,14 @@
 				{% for submission in test.submissions %}
 		
 				<li style="text-align: left;" class="list-group-item justify-content-between ">
-					Submission id {{ submission.submission_id }}-
-					Submission time {{ submission.submitted_at }} -
-					student {{ submission.student_id }} -
-					test {{ submission.test_id }} -
-					name {{ submission.student.name }}
+					<b>
+						{{ submission.student.name }}
+					</b>
+					 - {{ submission.student_id }} 
+					( {{ submission.submitted_at }} ) - 
+					{{ submission.total_points }}
+					<a class="btn btn-outline-info btn-sm" href="{{ url_for('view_submission', id=test.test_id, submission_id = submission.submission_id)}}">view</a> 
+
 				</li> 
 					
 				{% endfor %}

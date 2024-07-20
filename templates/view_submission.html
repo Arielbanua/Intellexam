@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+
+
+{% block content %}
+
+{% for message in get_flashed_messages() %}
+	
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+	
+{% endfor %}
+
+<div class="shadow p-3 mb-5 bg-body rounded">
+	<h2>{{ test.title }}</h2>
+    <h4>{{ submission.student.name }} - {{ submission.student_id }}</h4>
+	<small>{{ submission.submitted_at }}</small> <br/><br/>
+	<p>
+		<b> Score : {{ submission.total_points }}</b>
+	</p>
+
+</div>
+
+<div class="list-group">
+    {% for question in test.questions %}
+    {% if question.answer.result == True %}
+        <a  class="list-group-item list-group-item-action active" >
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ question.question_text }}</h5>
+            <h3>{{question.points}}</h3>
+        </div>
+            {% if question.question_type == 'multiple-choice' %}
+                <p class="mb-1"><b>Chosen Option: </b>{{question.answer.chosen_opt}}</p>
+                <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
+            {% elif question.question_type == 'essay' %}
+                <p class="mb-1"><b>Student Answer: </b>{{question.answer.answer_text}}</p>
+                <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
+            {% endif %}
+        <small><b>Result: </b>{{question.answer.result}}</small>
+        </a>
+    {% else %}
+        <a  class="list-group-item list-group-item-action" >
+            <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ question.question_text }}</h5>
+            <h3>{{question.points}}</h3>
+            </div>
+            {% if question.question_type == 'multiple-choice' %}
+                <p class="mb-1"><b>Chosen Option: </b>{{question.answer.chosen_opt}}</p>
+                <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
+            {% elif question.question_type == 'essay' %}
+                <p class="mb-1"><b>Student Answer: </b>{{question.answer.answer_text}}</p>
+                <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
+            {% endif %}
+            <small><b>Result: </b>{{question.answer.result}}</small>
+        </a>
+    {% endif %}
+    {% endfor %}
+
+{% endblock %}

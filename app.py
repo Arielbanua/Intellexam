@@ -61,8 +61,9 @@ class Users(db.Model, UserMixin):
 class Tests(db.Model):
     test_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
-    start_date = db.Column(db.DateTime, default=datetime.utcnow)
-    end_date = db.Column(db.DateTime, default=datetime.utcnow)
+    start_date = db.Column(db.DateTime, nullable = False)
+    end_date = db.Column(db.DateTime, nullable = False)
+    status = db.Column(db.String(255))
     # Foreign Key To Link User (refer to primary key of the user)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     # teacher object associated to the test
@@ -116,6 +117,7 @@ class Submission(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
     submitted_at = db.Column(db.DateTime, default=datetime.now)
+    total_points = db.Column(db.Integer)
     student = db.relationship('Users', backref=db.backref('submitter', lazy=True))
     test = db.relationship('Tests', backref=db.backref('submission_test', lazy=True))
     answers = db.relationship('Answers', backref=db.backref('answered_questions', lazy=True), lazy=True)
@@ -467,6 +469,9 @@ def submit_test(test_id):
     #initiate model
     model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
 
+    #total score
+    total_points = 0
+
     # Iterate over the questions and get the user's answers
     for question in questions:
 
@@ -477,6 +482,7 @@ def submit_test(test_id):
             if chosen_opt == correct_option:
                 result = True
                 points_gained = question.points
+                total_points = total_points + points_gained
             else:
                 result = False
                 points_gained = None
@@ -493,6 +499,7 @@ def submit_test(test_id):
             if answer == correct_answer:
                 result = True
                 points_gained = question.points
+                total_points = total_points + points_gained
             # else:
             #     result = False
             #     points_gained = None
@@ -506,6 +513,7 @@ def submit_test(test_id):
                 if similarity_result > 0.5:
                     result = True
                     points_gained = question.points
+                    total_points = total_points + points_gained
                 else:
                     result = False
                     points_gained = None
@@ -518,6 +526,7 @@ def submit_test(test_id):
         
     # Add the answers to the database
     submission.answers = answers # Add the answers to submission's answers field
+    submission.total_points = total_points #add the total points to submission
     db.session.add_all(answers)
     db.session.commit()
 
@@ -531,21 +540,15 @@ def submit_test(test_id):
     #return render_template('debug_answers.html', answers=answers, submission = submission_to_test1)
     return redirect(url_for('student_dashboard'))
 
+@app.route('/tests/<int:id>/submission/<int:submission_id>', methods=['GET', 'POST'])
+@login_required(role="teacher")
+def view_submission(id, submission_id):
+    test = Tests.query.get_or_404(id)
+    submission = Submission.query.get_or_404(submission_id)
+    return render_template("view_submission.html", test = test, submission=submission)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        if(request.form['answer'] == ''):
-            return "<html><body> <h1>Invalid answer</h1></body></html>"
-        else:
-            answer = request.form['answer']
-            print('test')
-            sentences = ["this is a very good sentence", answer]
-
-            model = SentenceTransformer('sentence-transformers/all-mpnet-base-v2')
-            embeddings = model.encode(sentences)
-            result = cosine_similarity([embeddings[0]], embeddings[1:])
-
-            return render_template('answer.html', answer=answer, result=result)
     if request.method == 'GET':
         form = RegisterForm()
         return redirect(url_for('login'))
