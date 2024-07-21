@@ -596,5 +596,12 @@ def student_dashboard():
     return render_template('student_dashboard.html', tests=tests)
 
 
+
+@app.route('/test-speech', methods=['GET', 'POST'])
+def test_speech():
+    return render_template('testing.html')
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

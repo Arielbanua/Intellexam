@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Speech API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #transcript {
+            width: 400px;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Web Speech API Demo</h1>
+    <button id="record-btn">Record</button>
+    <button id="stop-btn" disabled>Stop</button>
+    <textarea id="transcript" readonly></textarea>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

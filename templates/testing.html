@@ -14,49 +14,39 @@
       <p id="status" class="lead mt-3 text-light" style="display: none">Listenting ...</p>
     </div>
 
-    <main>
-        <form method="post" action="#">
-            <input type = "text" name = "answer"><br>
-            <input type="submit" value="check similarity">
-        </form>
+    <script src="{{ url_for('static', filename='speechRecognition.js') }}">
+     </script>
 
-        <section class="exam-section">
-            <h2>Exam Details</h2>
-            <form>
-                <label for="exam-name">Exam Name:</label>
-                <input type="text" id="exam-name" name="exam-name"><br><br>
-                <label for="exam-date">Exam Date:</label>
-                <input type="date" id="exam-date" name="exam-date"><br><br>
-                <label for="exam-time">Exam Time:</label>
-                <input type="time" id="exam-time" name="exam-time"><br><br>
-                <label for="exam-duration">Exam Duration:</label>
-                <input type="number" id="exam-duration" name="exam-duration"><br><br>
-                <input type="submit" value="Start Exam">
-            </form>
-        </section>
-        <section class="question-section">
-            <h2>Questions</h2>
-            <ol>
-                <li>
-                    <p>What is the capital of France?</p>
-                    <input type="radio" id="q1-a" name="q1">
-                    <label for="q1-a">Paris</label>
-                    <input type="radio" id="q1-b" name="q1">
-                    <label for="q1-b">London</label>
-                    <input type="radio" id="q1-c" name="q1">
-                    <label for="q1-c">Berlin</label>
-                </li>
-                <li>
-                    <p>What is the largest planet in our solar system?</p>
-                    <input type="radio" id="q2-a" name="q2">
-                    <label for="q2-a">Earth</label>
-                    <input type="radio" id="q2-b" name="q2">
-                    <label for="q2-b">Saturn</label>
-                    <input type="radio" id="q2-c" name="q2">
-                    <label for="q2-c">Jupiter</label>
-                </li>
-                <!-- Add more questions here -->
-            </ol>
-        </section>
-    </main>
+
+     
+
 {% endblock %}
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Speech API Demo</title>
+  <style>
+    #status {
+      display: none;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Web Speech API Demo</h1>
+  <button id="start">Start Speech Recognition</button>
+  <button id="stop">Stop Speech Recognition</button>
+  <div id="status">Listening...</div>
+  <h2>Final Transcript:</h2>
+  <div id="final"></div>
+  <h2>Interim Transcript:</h2>
+  <div id="interim"></div>
+
+  <script src="{{ url_for('static', filename='speechRecognition.js') }}"></script>
+</body>
+</html> -->
