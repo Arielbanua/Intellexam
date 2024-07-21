@@ -1,57 +1,58 @@
 if ("webkitSpeechRecognition" in window) {
-    // Initialize webkitSpeechRecognition
-    let speechRecognition = new webkitSpeechRecognition();
-  
-    // String for the Final Transcript
-    let final_transcript = "";
-  
-    // Set the properties for the Speech Recognition object
-    speechRecognition.continuous = true;
-    speechRecognition.interimResults = true;
-  
-    // Callback Function for the onStart Event
-    speechRecognition.onstart = () => {
-      // Show the Status Element
-      document.querySelector("#status").style.display = "block";
-    };
-    speechRecognition.onerror = () => {
-      // Hide the Status Element
-      document.querySelector("#status").style.display = "none";
-    };
-    speechRecognition.onend = () => {
-      // Hide the Status Element
-      document.querySelector("#status").style.display = "none";
-    };
-  
-    speechRecognition.onresult = (event) => {
-      // Create the interim transcript string locally because we don't want it to persist like final transcript
-      let interim_transcript = "";
-  
-      // Loop through the results from the speech recognition object.
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        // If the result item is Final, add it to Final Transcript, Else add it to Interim transcript
-        if (event.results[i].isFinal) {
-          final_transcript += event.results[i][0].transcript;
-        } else {
-          interim_transcript += event.results[i][0].transcript;
-        }
-      }
-  
-      // Set the Final transcript and Interim transcript.
-      document.querySelector("#final").innerHTML = final_transcript;
-      document.querySelector("#interim").innerHTML = interim_transcript;
-    };
-  
-    // Set the onClick property of the start button
-    document.querySelector("#start").onclick = () => {
-      // Start the Speech Recognition
-      speechRecognition.start();
-    };
-    // Set the onClick property of the stop button
-    document.querySelector("#stop").onclick = () => {
-      // Stop the Speech Recognition
-      speechRecognition.stop();
-    };
-  } else {
-    console.log("Speech Recognition Not Available");
-  }
+  const questions = document.querySelectorAll('.speech-recognition-container');
+
+  questions.forEach((questionContainer) => {
+      const questionId = questionContainer.querySelector('textarea').name.replace('answer_', '');
+      const startButton = questionContainer.querySelector(`#start_${questionId}`);
+      const stopButton = questionContainer.querySelector(`#stop_${questionId}`);
+      const interimTranscriptElement = questionContainer.querySelector(`#interim_${questionId}`);
+      const finalTranscriptElement = questionContainer.querySelector(`#final_${questionId}`);
+      const textarea = questionContainer.querySelector(`textarea`);
+
+      let speechRecognition = new webkitSpeechRecognition();
+      let finalTranscript = "";
+      let interimTranscript = "";
+
+      speechRecognition.continuous = true;
+      speechRecognition.interimResults = true;
+
+      speechRecognition.onstart = () => {
+          // Show the Status Element
+          // document.querySelector("#status").style.display = "block";
+      };
+      speechRecognition.onerror = () => {
+          // Hide the Status Element
+          // document.querySelector("#status").style.display = "none";
+      };
+      speechRecognition.onend = () => {
+          // Hide the Status Element
+          // document.querySelector("#status").style.display = "none";
+      };
+
+      speechRecognition.onresult = (event) => {
+          interimTranscript = "";
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+              if (event.results[i].isFinal) {
+                  finalTranscript += event.results[i][0].transcript;
+              } else {
+                  interimTranscript += event.results[i][0].transcript;
+              }
+          }
+
+          interimTranscriptElement.innerHTML = interimTranscript;
+          finalTranscriptElement.innerHTML = finalTranscript;
+          textarea.value = finalTranscript;
+      };
+
+      startButton.onclick = () => {
+          speechRecognition.start();
+      };
+
+      stopButton.onclick = () => {
+          speechRecognition.stop();
+      };
+  });
+} else {
+  console.log("Speech Recognition Not Available");
+}
