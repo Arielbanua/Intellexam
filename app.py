@@ -388,6 +388,27 @@ def delete_question(id, question_id):
         flash("Delete failed")
         return redirect(url_for('test', id=id))
 
+@app.route('/tests/<int:id>/submission/<int:submission_id>/delete-submission', methods=['GET', 'POST'])
+@login_required(role="teacher")
+def delete_submission(id, submission_id):
+    submission_to_delete = Submission.query.get_or_404(submission_id)
+    test = Tests.query.get_or_404(id)
+    try:
+        # Remove the question from the test's questions field
+        test.submissions.remove(submission_to_delete)
+
+        db.session.delete(submission_to_delete)
+        db.session.commit()
+
+	    # Return a message
+        flash("submission Was Deleted!")
+        return redirect(url_for('test', id=id))
+    
+    except:
+        # Return an error message
+        flash("Delete failed")
+        return redirect(url_for('test', id=id))
+
 @app.route('/tests/<int:id>/<int:question_id>/edit-question', methods=['GET', 'POST'])
 @login_required(role="teacher")
 def edit_question(id, question_id):
@@ -575,6 +596,29 @@ def submit_test(test_id):
 def view_submission(id, submission_id):
     test = Tests.query.get_or_404(id)
     submission = Submission.query.get_or_404(submission_id)
+    return render_template("view_submission.html", test = test, submission=submission)
+
+@app.route('/tests/<int:id>/submission/<int:submission_id>/<int:answer_id>', methods=['GET', 'POST'])
+@login_required(role="teacher")
+def change_result(id, submission_id, answer_id):
+    test = Tests.query.get_or_404(id)
+    submission = Submission.query.get_or_404(submission_id)
+    answer_to_update = Answers.query.get_or_404(answer_id)
+    question = Questions.query.get_or_404(answer_to_update.question_id)
+
+    if answer_to_update.result == True:
+        answer_to_update.result = False
+        answer_to_update.points_gained = 0
+        submission.total_points = submission.total_points - question.points
+    else:
+        answer_to_update.result = True
+        answer_to_update.points_gained = question.points
+        submission.total_points = submission.total_points + question.points
+       
+
+    #update database
+    db.session.add(answer_to_update)
+    db.session.commit()
     return render_template("view_submission.html", test = test, submission=submission)
 
 @app.route('/', methods=['GET', 'POST'])

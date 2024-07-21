@@ -57,8 +57,13 @@
 			<ul class="list-group list-group-numbered">
 				{% for question in questions %}
 		
-				<li style="text-align: left;" class="list-group-item justify-content-between ">
-					{{ question.question_text }} 
+				<li style="text-align: left;" class="list-group-item d-flex ">
+					<div class="flex-grow-1">
+						<b >
+							{{ question.question_text }} 
+						</b>
+					</div>
+					
 					{% if test.status == 'scheduled' %}
 						<a class="btn btn-outline-danger btn-sm" href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete</a> 
 						<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
@@ -74,15 +79,24 @@
 			<ul class="list-group list-group-numbered">
 				{% for submission in test.submissions %}
 		
-				<li style="text-align: left;" class="list-group-item justify-content-between ">
-					<b>
-						{{ submission.student.name }}
-					</b>
-					 - {{ submission.student_id }} 
-					( {{ submission.submitted_at }} ) - 
-					{{ submission.total_points }}
+				<li style="text-align: left;" class="list-group-item d-flex ">
+					<div class="flex-grow-1">
+						<b >
+							{{ submission.student.name }}
+						</b>
+						- Total score = <b>{{ submission.total_points }}</b>
+					</div>
+					<!-- <div class="flex-grow-1">
+						
+							- {{ submission.student_id }} 
+							( {{ submission.submitted_at }} ) - 
+							{{ submission.total_points }}
+						
+					</div> -->
+					
+					 
 					<a class="btn btn-outline-info btn-sm" href="{{ url_for('view_submission', id=test.test_id, submission_id = submission.submission_id)}}">view</a> 
-
+					<a class="btn btn-outline-danger btn-sm" href="{{ url_for('delete_submission', id=test.test_id, submission_id = submission.submission_id)}}">delete</a> 
 				</li> 
 					
 				{% endfor %}

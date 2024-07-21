@@ -35,12 +35,14 @@
                     </div>
                         {% if question.question_type == 'multiple-choice' %}
                             <p class="mb-1"><b>Chosen Option: </b>{{answer.chosen_opt}}</p>
-                            <p class="mb-1"><b>Correct Option: </b>{{answer.correct_opt}}</p>
+                            <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
                         {% elif question.question_type == 'essay' %}
                             <p class="mb-1"><b>Student Answer: </b>{{answer.answer_text}}</p>
-                            <p class="mb-1"><b>Correct Answer: </b>{{answer.correct_ans}}</p>
+                            <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
                         {% endif %}
                     <small><b>Result: </b>{{answer.result}}</small>
+                    <a class="btn btn-danger btn-sm" href="{{ url_for('change_result', id=test.test_id, submission_id = submission.submission_id, answer_id = answer.answer_id)}}">Change Result</a> 
+
                     </a>
                 {% else %}
                     <a  class="list-group-item list-group-item-action" >
@@ -50,12 +52,13 @@
                         </div>
                         {% if question.question_type == 'multiple-choice' %}
                             <p class="mb-1"><b>Chosen Option: </b>{{answer.chosen_opt}}</p>
-                            <p class="mb-1"><b>Correct Option: </b>{{answer.correct_opt}}</p>
+                            <p class="mb-1"><b>Correct Option: </b>{{question.correct_opt}}</p>
                         {% elif question.question_type == 'essay' %}
                             <p class="mb-1"><b>Student Answer: </b>{{answer.answer_text}}</p>
-                            <p class="mb-1"><b>Correct Answer: </b>{{answer.correct_ans}}</p>
+                            <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
                         {% endif %}
                         <small><b>Result: </b>{{answer.result}}</small>
+                        <a class="btn btn-success btn-sm" href="{{ url_for('change_result', id=test.test_id, submission_id = submission.submission_id, answer_id = answer.answer_id)}}">Change Result</a> 
                     </a>
                 {% endif %}
             {% endif %}
