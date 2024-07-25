@@ -35,26 +35,26 @@
 			<small>{{ test.start_date }}</small> <br/>
 		</p>
 		<a href="{{ url_for('test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">Manage test</a>
-		<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal" >delete test</a>
+        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal-{{ test.test_id }}">delete test</button>
 
 		<!-- Modal -->
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-	  <div class="modal-content">
-		<div class="modal-header">
-		  <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Confirmation</h1>
-		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal fade" id="confirmationModal-{{ test.test_id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+				<h1 class="modal-title fs-5" id="exampleModalLabel">Delete Confirmation</h1>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+				Are you sure you want to delete this test?
+				</div>
+				<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+				<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-danger">Delete</a>
+			</div>
+			</div>
+			</div>
 		</div>
-		<div class="modal-body">
-		  Are you sure you want to delete this test?
-		</div>
-		<div class="modal-footer">
-		  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-		<a href="{{ url_for('delete_test', id=test.test_id)}}" class="btn btn-danger">Delete</a>
-	</div>
-	  </div>
-	</div>
-  </div>
 
 		</div>
 		</div>	

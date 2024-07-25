@@ -85,11 +85,11 @@
 					</div>
 					
 					{% if test.status == 'scheduled' %}
-						<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#quesconfirmationModal" href="{{ url_for('delete_question', id=test.test_id, question_id = question.question_id)}}">delete</a> 
+						<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#quesconfirmationModal-{{ question.question_id }}">delete</a> 
 						<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
 
 												<!-- Modal -->
-						<div class="modal fade" id="quesconfirmationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal fade" id="quesconfirmationModal-{{ question.question_id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 							<div class="modal-dialog">
 							<div class="modal-content">
 								<div class="modal-header">
@@ -136,10 +136,10 @@
 					
 					 
 					<a class="btn btn-outline-info btn-sm" href="{{ url_for('view_submission', id=test.test_id, submission_id = submission.submission_id)}}">view</a> 
-					<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#subconfirmationModal" href="{{ url_for('delete_submission', id=test.test_id, submission_id = submission.submission_id)}}">delete</a>
+					<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#subconfirmationModal-{{ submission.submission_id }}" >delete</a>
 					
 					<!-- Modal -->
-					<div class="modal fade" id="subconfirmationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal fade" id="subconfirmationModal-{{ submission.submission_id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 						<div class="modal-dialog">
 						<div class="modal-content">
 							<div class="modal-header">
