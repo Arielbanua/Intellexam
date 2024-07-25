@@ -31,9 +31,11 @@
                 <div class="speech-controls">
                     <button  id="start_{{ question.question_id }}">Start</button>
                     <button id="stop_{{ question.question_id }}">Stop</button>
+                    <button type="button" id="undo_{{ question.question_id }}">Undo</button>
+
                 </div>
-                <!-- <p id="interim_{{ question.question_id }}"></p>
-                <p id="final_{{ question.question_id }}"></p> -->
+                <p id="interim_{{ question.question_id }}"></p>
+                <p id="final_{{ question.question_id }}"></p>
                 <p id="status" class="lead mt-3 text-primary" style="display: none">Listenting ...</p>
 
                 
@@ -79,9 +81,14 @@
       const questionId = questionContainer.querySelector('textarea').name.replace('answer_', '');
       const startButton = questionContainer.querySelector(`#start_${questionId}`);
       const stopButton = questionContainer.querySelector(`#stop_${questionId}`);
-    //   const interimTranscriptElement = questionContainer.querySelector(`#interim_${questionId}`);
-    //   const finalTranscriptElement = questionContainer.querySelector(`#final_${questionId}`);
+      const interimTranscriptElement = questionContainer.querySelector(`#interim_${questionId}`);
+      const finalTranscriptElement = questionContainer.querySelector(`#final_${questionId}`);
       const textarea = questionContainer.querySelector(`textarea`);
+      const undoButton = questionContainer.querySelector(`#undo_${questionId}`);
+
+            
+        // Create an array to store the interim transcripts
+        let transcripts = [];
 
       let speechRecognition = new webkitSpeechRecognition();
       let finalTranscript = "";
@@ -107,16 +114,17 @@
           interimTranscript = "";
 
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-              if (event.results[i].isFinal) {
-                  finalTranscript += event.results[i][0].transcript;
-              } else {
-                  interimTranscript += event.results[i][0].transcript;
-              }
-          }
+                if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript;
+                } else {
+                interimTranscript += event.results[i][0].transcript;
+                transcripts.push(interimTranscript);
+                }
+            }
 
-        //   interimTranscriptElement.innerHTML = interimTranscript;
-        //   finalTranscriptElement.innerHTML = finalTranscript;
-          textarea.value = finalTranscript;
+            interimTranscriptElement.innerHTML = interimTranscript;
+            finalTranscriptElement.innerHTML = finalTranscript;
+            textarea.value = finalTranscript;
       };
 
       startButton.onclick = () => {
@@ -128,6 +136,17 @@
         event.preventDefault();
           speechRecognition.stop();
       };
+
+
+      undoButton.addEventListener('click', () => {
+        let words = finalTranscript.split(' ');
+        if (words.length > 0) {
+            words.pop();
+            finalTranscript = words.join(' ');
+        }
+        textarea.value = finalTranscript;
+        });
+
   });
 } else {
   console.log("Speech Recognition Not Available");
