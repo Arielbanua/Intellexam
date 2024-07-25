@@ -25,7 +25,7 @@
                 <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="3"> {{ question.option3 }}</li>
                 <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="4"> {{ question.option4 }}</li>
             </ul>
-        {% elif question.question_type == 'essay' %}
+        {% elif question.question_type == 'essay' and question.stt == True %}
             <div class="speech-recognition-container">
                 <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}" readonly></textarea>
                 <div class="speech-controls">
@@ -40,6 +40,8 @@
 
                 
             </div>
+        {% else %}
+            <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}"></textarea>
         {% endif %}
     {% endfor %}
     <br>

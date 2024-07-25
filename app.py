@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError, IntegerField, RadioField, DateTimeLocalField, TextAreaField, DateTimeField
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, SelectField, ValidationError, IntegerField, RadioField, DateTimeLocalField, TextAreaField, DateTimeField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional
 from wtforms.widgets import TextArea
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user
@@ -92,6 +92,7 @@ class Questions(db.Model):
     option4 = db.Column(db.String(255))
     correct_opt = db.Column(db.Integer)
     correct_ans = db.Column(db.String(255))
+    stt = db.Column(db.Boolean)
 	# Foreign Key To Link test (refer to primary key of the test)
     test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
     # test object related to the question
@@ -105,6 +106,7 @@ class Answers(db.Model):
     result = db.Column(db.Boolean, nullable=False) 
     chosen_opt = db.Column(db.Integer)
     points_gained = db.Column(db.Integer)
+    similarity_score = db.Column(db.Float)
 	# Foreign Key To Link to question (refer to primary key of the question)
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
     # Foreign Key To Link to users(student) (refer to primary key of the user)
@@ -195,6 +197,7 @@ class QuestionForm(FlaskForm):
    
     # Essay field
     correct_ans = TextAreaField('Correct Answer')
+    stt = RadioField('Speech to text', choices=[(True, 'Yes'), (False, 'No')], validators=[Optional()])
 
     submit = SubmitField("Submit")
 
@@ -317,6 +320,7 @@ def add_question(id):
 
             else:
                 question.correct_ans = form.correct_ans.data
+                question.stt = form.stt.data == 'True'
 
             test.questions.append(question)
 
@@ -437,6 +441,8 @@ def edit_question(id, question_id):
             question_to_edit.points = form.points.data
 
             question_to_edit.correct_ans = form.correct_ans.data
+            question_to_edit.stt = form.stt.data == 'True'
+
             # Update Database
             db.session.add(question_to_edit)
             db.session.commit()
@@ -572,7 +578,7 @@ def submit_test(test_id):
             # Create an Answer object and add it to the list
             answer_obj = Answers(answer_text = answer, result=result, question_id=question.question_id, 
                                  student_id=current_user.id, student = current_user, points_gained = points_gained,
-                                 submission_id=submission.submission_id, submission = submission)
+                                 submission_id=submission.submission_id, submission = submission, similarity_score=similarity_result)
             answers.append(answer_obj)
         
     # Add the answers to the database
