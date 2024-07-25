@@ -264,6 +264,16 @@ def create_test():
     form = TestForm()
     if form.validate_on_submit():
         creator = current_user.id
+        current_time = datetime.now()
+        if form.start_date.data < current_time:
+            # Return error Message
+            flash("Cannot set start date before the current time")
+            return redirect(url_for('create_test'))  
+        elif form.end_date.data < form.start_date.data:
+            # Return error Message
+            flash("Cannot set end date before the start date")
+            return redirect(url_for('create_test'))  
+
         code = secrets.token_hex(3)  # generate a random 6-digit code
         test = Tests(title=form.title.data, start_date=form.start_date.data, end_date=form.end_date.data, teacher_id=creator, code=code, teacher = current_user)
 		# Clear The Form
@@ -353,6 +363,17 @@ def edit_test(id):
     test_to_edit = Tests.query.get_or_404(id)
     form = TestForm()
     if form.validate_on_submit():
+
+        current_time = datetime.now()
+        if form.start_date.data < current_time:
+            # Return error Message
+            flash("Cannot set start date before the current time")
+            return redirect(url_for('create_test'))  
+        elif form.end_date.data < form.start_date.data:
+            # Return error Message
+            flash("Cannot set end date before the start date")
+            return redirect(url_for('create_test'))  
+
         test_to_edit.title = form.title.data
         test_to_edit.start_date = form.start_date.data
         test_to_edit.end_date = form.end_date.data
