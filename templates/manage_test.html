@@ -73,15 +73,19 @@
 			<ul class="list-group list-group-numbered">
 				{% for question in questions %}
 		
-				<li style="text-align: left;" data-bs-toggle="collapse" href="#collapse-{{ question.question_id }}" class="list-group-item d-flex " aria-expanded="false" aria-controls="collapseExample">
+				<li style="text-align: left;" class="list-group-item d-flex ">
 					<div class="flex-grow-1">
-						<h7 >
-							<b>{{ question.question_text }} </b>-
-							<small><b style="color: blue;">{{ question.question_type }}</b></small> -
-							<small><b style="color: rebeccapurple;">POINTS: {{ question.points }}</b></small> -
-						</h7>
+						<b style="color: blue;">
+							{{ question.question_text }} 
+						</b><br>
+						<b style="color: rgb(53, 206, 173);">
+							question type: {{ question.question_type }} 
+						</b> <br>
+						<b style="color: rgb(189, 45, 45);">
+							points: {{ question.points }} 
+						</b>
 					</div>
-
+					
 					{% if test.status == 'scheduled' %}
 						<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#quesconfirmationModal-{{ question.question_id }}">delete</a> 
 						<a class="btn btn-outline-warning btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
