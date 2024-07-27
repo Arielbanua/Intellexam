@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, BooleanField, SelectField, ValidationError, IntegerField, RadioField, DateTimeLocalField, TextAreaField, DateTimeField
-from wtforms.validators import DataRequired, EqualTo, Length, Optional
+from wtforms.validators import DataRequired, Optional
 from wtforms.widgets import TextArea
 from flask_login import UserMixin, login_user, LoginManager, logout_user, current_user
 from functools import wraps
