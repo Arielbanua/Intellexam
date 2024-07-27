@@ -19,17 +19,13 @@
 <br/>
 
 <div class="shadow p-3 mb-5 bg-body rounded">
-	<h2>{{ test.title }}</h2>
-    {{ test.teacher_id }}<br/>
-	<small>{{ test.start_date }}</small> <br/><br/>
-	<p>
-		Test code : {{ test.code }}
-	</p>
-	<p>
-		Status : {{ test.status }}
-	</p>
-
-	<br/><br/>
+	<h2 style="text-align: center;">{{ test.title }}</h2>
+    <h3>{{ test.teacher.name }} </h3>
+	<h6><b>Start Date : </b><small style="color: blue;">{{ test.start_date }}</small></h6> 
+	<h6><b>End Date : </b><small style="color: blue;">{{ test.end_date }}</small></h6> 
+	<h6><b>Test code : </b><small style="color: blue;">{{ test.code }}</small></h6>
+	<h6><b>Status : </b><small style="color: blue;">{{ test.status }}</small></h6>
+	<br/>
 	{% if test.status == 'scheduled' %}
 		<a href="{{ url_for('add_question', id=test.test_id)}}" class="btn btn-outline-primary btn-sm">add question</a>
 		<a href="{{ url_for('edit_test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">edit test</a>
@@ -77,16 +73,18 @@
 			<ul class="list-group list-group-numbered">
 				{% for question in questions %}
 		
-				<li style="text-align: left;" class="list-group-item d-flex ">
+				<li style="text-align: left;" data-bs-toggle="collapse" href="#collapse-{{ question.question_id }}" class="list-group-item d-flex " aria-expanded="false" aria-controls="collapseExample">
 					<div class="flex-grow-1">
-						<b >
-							{{ question.question_text }} 
-						</b>
+						<h7 >
+							<b>{{ question.question_text }} </b>-
+							<small><b style="color: blue;">{{ question.question_type }}</b></small> -
+							<small><b style="color: rebeccapurple;">POINTS: {{ question.points }}</b></small> -
+						</h7>
 					</div>
-					
+
 					{% if test.status == 'scheduled' %}
 						<a class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#quesconfirmationModal-{{ question.question_id }}">delete</a> 
-						<a class="btn btn-outline-info btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
+						<a class="btn btn-outline-warning btn-sm" href="{{ url_for('edit_question', id=test.test_id, question_id = question.question_id)}}">edit</a> 
 
 												<!-- Modal -->
 						<div class="modal fade" id="quesconfirmationModal-{{ question.question_id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -166,7 +164,6 @@
   </div>
 	
 
-	
 
 
 {% endblock %}
