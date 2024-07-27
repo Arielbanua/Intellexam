@@ -36,7 +36,7 @@
                 </div>
                 <p id="interim_{{ question.question_id }}"></p>
                 <p id="final_{{ question.question_id }}"></p>
-                <p id="status" class="lead mt-3 text-primary" style="display: none">Listenting ...</p>
+                <p id="status_{{ question.question_id }}" class="lead mt-3 text-primary" style="display: none">Listenting ...</p>
 
                 
             </div>
@@ -101,15 +101,15 @@
 
       speechRecognition.onstart = () => {
           // Show the Status Element
-          document.querySelector("#status").style.display = "block";
-      };
+          document.getElementById(`status_${questionId}`).style.display = 'block';
+        };
       speechRecognition.onerror = () => {
           // Hide the Status Element
-          document.querySelector("#status").style.display = "none";
+          document.getElementById(`status_${questionId}`).style.display = "none";
       };
       speechRecognition.onend = () => {
           // Hide the Status Element
-          document.querySelector("#status").style.display = "none";
+          document.getElementById(`status_${questionId}`).style.display = "none";
       };
 
       speechRecognition.onresult = (event) => {
