@@ -57,6 +57,7 @@
                         {% elif question.question_type == 'essay' %}
                             <p class="mb-1"><b>Student Answer: </b>{{answer.answer_text}}</p>
                             <p class="mb-1"><b>Correct Answer: </b>{{question.correct_ans}}</p>
+                            <p class="mb-1"><b>Similarity Score: </b>{{ "%.2f" % (answer.similarity_score * 100) }}%</p>
                         {% endif %}
                         <small><b>Result: </b>{{answer.result}}</small>
                         <a class="btn btn-success btn-sm" href="{{ url_for('change_result', id=test.test_id, submission_id = submission.submission_id, answer_id = answer.answer_id)}}">Change Result</a> 

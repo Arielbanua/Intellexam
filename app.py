@@ -556,11 +556,17 @@ def submit_test(test_id):
         # Check if the question is multiple-choice or essay
         if question.question_type == 'multiple-choice':
             correct_option = question.correct_opt
-            chosen_opt = int(request.form.get(f"chosen_opt_{question.question_id}"))
-            if chosen_opt == correct_option:
-                result = True
-                points_gained = question.points
-                total_points = total_points + points_gained
+            chosen_opt = request.form.get(f"chosen_opt_{question.question_id}")
+            if chosen_opt is not None:
+                chosen_opt = int(chosen_opt)
+
+                if chosen_opt == correct_option:
+                    result = True
+                    points_gained = question.points
+                    total_points = total_points + points_gained
+                else:
+                    result = False
+                    points_gained = None
             else:
                 result = False
                 points_gained = None
