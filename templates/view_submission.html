@@ -13,6 +13,9 @@
 	
 {% endfor %}
 
+<a href="{{ url_for('test', id = test.test_id)}}" class="btn btn-secondary btn-lg" style="width: 200;"><</a>
+<br/><br/>
+
 <div class="shadow p-3 mb-5 bg-body rounded">
 	<h2>{{ test.title }}</h2>
     <h4>{{ submission.student.name }} - {{ submission.student_id }}</h4>

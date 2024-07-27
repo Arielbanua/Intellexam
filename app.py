@@ -386,7 +386,7 @@ def edit_test(id):
         form.title.data = test_to_edit.title
         form.start_date.data = test_to_edit.start_date
         form.end_date.data = test_to_edit.end_date
-        return render_template('edit_test.html', form=form)
+        return render_template('edit_test.html', form=form, id=id)
     
     else:
         flash("not authorized")
@@ -483,10 +483,10 @@ def edit_question(id, question_id):
             form.option3.data = question_to_edit.option3
             form.option4.data = question_to_edit.option4
             form.correct_opt.data = question_to_edit.correct_opt
-            return render_template('edit_question.html', form=form, question = question_to_edit)
+            return render_template('edit_question.html', form=form, question = question_to_edit, id=id)
         elif question_to_edit.question_type == 'essay':
             form.correct_ans.data = question_to_edit.correct_ans
-            return render_template('edit_question.html', form=form, question = question_to_edit)
+            return render_template('edit_question.html', form=form, question = question_to_edit,id=id)
         
 @app.route('/student/enter-code', methods=['GET', 'POST'])
 @login_required(role="student")

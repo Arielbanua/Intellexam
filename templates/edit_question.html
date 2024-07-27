@@ -3,7 +3,9 @@
 
 {% block content %}
 
-<h1>Add question</h1>
+<a href="{{ url_for('test', id = id)}}" class="btn btn-secondary btn-lg" style="width: 200;"><</a>
+
+<h1>Edit question</h1>
 <br>
 
 {% for message in get_flashed_messages() %}

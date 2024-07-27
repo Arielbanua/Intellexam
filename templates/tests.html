@@ -16,7 +16,8 @@
 	
 {% endfor %}
 
-<br/>
+<h3><b>Teacher:</b> {{current_user.name}} - {{current_user.id}}</h3>
+<br>
 
 <a href="{{ url_for('create_test')}}" class=" d-grid gap-2 btn btn-primary btn-lg">CREATE TEST</a>
 
@@ -31,8 +32,9 @@
 		<div class="card ">
 		<div class="card-body">
 		<h5 class="card-title"><a href="{{ url_for('test', id=test.test_id)}}">{{ test.title }}</a></h5>
-		<p class="card-text">{{ test.teacher_id }}<br/>
-			<small>{{ test.start_date }}</small> <br/>
+		<p class="card-text">{{ test.teacher.name }}<br/>
+			<small><b> Start date: </b>{{ test.start_date }}</small> <br/>
+			<small><b> End date: </b>{{ test.end_date }}</small> <br/>
 		</p>
 		<a href="{{ url_for('test', id=test.test_id)}}" class="btn btn-outline-info btn-sm">Manage test</a>
         <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal-{{ test.test_id }}">delete test</button>
