@@ -13,42 +13,53 @@
 {% endfor %}
 
 <h1>Start Test: {{ test.title }}</h1>
-<p>Remaining time: <span id="timer" class= "text-bg-warning"></span></p>
 
-<form id="test-form" action="{{ url_for('submit_test', test_id = test.test_id) }}" method="post">
-    {% for question in questions %}
-        <h2>{{ loop.index }}. {{ question.question_text }}</h2>
-        {% if question.question_type == 'multiple-choice' %}
-            <ul>
-                <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="1"> {{ question.option1 }}</li>
-                <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="2"> {{ question.option2 }}</li>
-                <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="3"> {{ question.option3 }}</li>
-                <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="4"> {{ question.option4 }}</li>
-            </ul>
-        {% elif question.question_type == 'essay' and question.stt == True %}
-            <div class="speech-recognition-container">
-                <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}" readonly></textarea>
-                <div class="speech-controls">
-                    <button  id="start_{{ question.question_id }}">Start</button>
-                    <button id="stop_{{ question.question_id }}">Stop</button>
-                    <button type="button" id="undo_{{ question.question_id }}">Undo</button>
-
-                </div>
-                <p id="interim_{{ question.question_id }}"></p>
-                <p id="final_{{ question.question_id }}"></p>
-                <p id="status_{{ question.question_id }}" class="lead mt-3 text-primary" style="display: none">Listenting ...</p>
-
-                
-            </div>
-        {% else %}
-            <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}"></textarea>
-        {% endif %}
-    {% endfor %}
-    <br>
-    <input type="submit" value="Submit" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body w-100")>
-</form>
-
-
+<div class="row">
+    <div class="col-2 nav-column">
+        <p>Remaining time: <span id="timer" class= "text-bg-warning"></span></p>
+      <div id="list-example" class="list-group">
+        {% for question in questions %}
+        <a class="list-group-item list-group-item-action" href="#list-item-{{ question.question_id }}">Question {{ loop.index }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-8 questions-column">
+      <div data-bs-spy="scroll" data-bs-target="#list-example" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+        <form id="test-form" action="{{ url_for('submit_test', test_id = test.test_id) }}" method="post">
+            {% for question in questions %}
+                <h2 id="list-item-{{ question.question_id }}">{{ loop.index }}. {{ question.question_text }}</h2>
+                {% if question.question_type == 'multiple-choice' %}
+                    <ul>
+                        <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="1"> {{ question.option1 }}</li>
+                        <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="2"> {{ question.option2 }}</li>
+                        <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="3"> {{ question.option3 }}</li>
+                        <li><input type="radio" style="scale: 1.5;" name="chosen_opt_{{ question.question_id }}" value="4"> {{ question.option4 }}</li>
+                    </ul>
+                {% elif question.question_type == 'essay' and question.stt == True %}
+                    <div class="speech-recognition-container">
+                        <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}" readonly></textarea>
+                        <div class="speech-controls">
+                            <button  id="start_{{ question.question_id }}">Start</button>
+                            <button id="stop_{{ question.question_id }}">Stop</button>
+                            <button type="button" id="undo_{{ question.question_id }}">Undo</button>
+        
+                        </div>
+                        <p id="interim_{{ question.question_id }}"></p>
+                        <p id="final_{{ question.question_id }}"></p>
+                        <p id="status_{{ question.question_id }}" class="lead mt-3 text-primary" style="display: none">Listenting ...</p>
+        
+                        
+                    </div>
+                {% else %}
+                    <textarea rows = "10" class = "w-75 mb-4" name="answer_{{ question.question_id }}"></textarea>
+                {% endif %}
+            {% endfor %}
+            <br>
+            <input type="submit" value="Submit" class="btn btn-success btn-block btn-lg gradient-custom-4 text-body w-100")>
+        </form>
+      </div>
+    </div>
+  </div>
 
 <script>
     const startTime = new Date("{{ test.start_date }}");

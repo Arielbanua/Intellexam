@@ -78,3 +78,14 @@ H1 {
     font-size: 40px;
     text-align: center;
 }
+
+.nav-column {
+    position: fixed;
+    left: 100;
+    top: 50;
+    width: 310px; /* adjust the width to your liking */
+  }
+  
+  .questions-column {
+    margin-left: 310px; /* adjust the margin to match the width of the nav column */
+  }
