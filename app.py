@@ -239,7 +239,7 @@ def login():
                 if (user.role == "teacher"):
                     login_user(user)
                     flash("Login Succesfull!!")
-                    return redirect(url_for('teacher_dashboard'))
+                    return redirect(url_for('tests'))
                 else:
                     login_user(user)
                     flash("Login Succesfull!!")
@@ -660,25 +660,12 @@ def index():
         form = RegisterForm()
         return redirect(url_for('login'))
 
-@app.route('/teacher', methods=['GET', 'POST'])
-@login_required(role="teacher")
-def teacher_dashboard():
-    return render_template('teacher_dashboard.html')
-
 @app.route('/student', methods=['GET', 'POST'])
 @login_required(role="student")
 def student_dashboard():
     # Grab all the tests registered by the student from the database
     tests = current_user.tests_registered
     return render_template('student_dashboard.html', tests=tests)
-
-
-
-@app.route('/test-speech', methods=['GET', 'POST'])
-def test_speech():
-    return render_template('testing.html')
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
