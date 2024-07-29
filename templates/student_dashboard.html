@@ -29,7 +29,7 @@
 
 		<div class="card ">
 		<div class="card-body">
-		<h5 class="card-title"><a href="{{ url_for('test', id=test.test_id)}}">{{ test.title }}</a></h5>
+		<h5 class="card-title">{{ test.title }}</h5>
 		<p class="card-text">{{ test.teacher.name }}<br/>
 			<small><b> Start date: </b>{{ test.start_date }}</small> <br/>
 			<small><b> End date: </b>{{ test.end_date }}</small> <br/>
